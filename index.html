@@ -275,13 +275,14 @@
       word-break: break-word;
     }
 
+    /* 右侧设定图 + 文字设定区域 */
     .commission-image-section {
-      flex: 1 1 140px;
-      min-width: 120px;
+      flex: 1 1 160px;
+      min-width: 140px;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.4rem;
+      gap: 0.6rem;
     }
 
     .image-preview-wrapper {
@@ -326,6 +327,7 @@
       overflow: hidden;
       display: inline-block;
       width: 100%;
+      max-width: 160px;
     }
 
     .upload-btn-wrapper input[type="file"] {
@@ -361,6 +363,53 @@
     .upload-btn-wrapper:hover .upload-btn {
       background: rgba(195, 216, 240, 0.5);
       border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* 文字设定文本框 */
+    .text-setting-area {
+      width: 100%;
+      max-width: 160px;
+    }
+
+    .text-setting-area label {
+      display: block;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #405a72;
+      margin-bottom: 0.2rem;
+      opacity: 0.7;
+      font-weight: 400;
+    }
+
+    .text-setting-area textarea {
+      width: 100%;
+      padding: 0.5rem 0.7rem;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(200, 215, 235, 0.4);
+      border-radius: 1.2rem;
+      font-size: 0.85rem;
+      color: #1f2e3c;
+      outline: none;
+      transition: 0.2s;
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+      line-height: 1.4;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .text-setting-area textarea:focus {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: #8ba9cc;
+      box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.15);
+    }
+
+    .text-setting-area textarea::placeholder {
+      color: #8a9fb0;
+      font-weight: 300;
+      font-size: 0.8rem;
     }
 
     .commission-actions {
@@ -444,7 +493,7 @@
       margin-bottom: 1rem;
     }
 
-    /* 编辑弹窗 - 毛玻璃 */
+    /* 编辑弹窗 */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -574,6 +623,8 @@
       .commission-item { flex-direction: column; }
       .commission-image-section { align-items: center; width: 100%; }
       .image-preview-wrapper { max-width: 100%; width: 100%; aspect-ratio: 1/1; }
+      .upload-btn-wrapper { max-width: 100%; }
+      .text-setting-area { max-width: 100%; }
       .commission-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
       .modal-box { padding: 1.8rem; }
     }
@@ -644,7 +695,7 @@
 <script>
   (function() {
     let commissions = [];
-    let editingId = null; // 当前编辑的委托ID
+    let editingId = null;
 
     function loadData() {
       const stored = localStorage.getItem('commissionsData');
@@ -654,13 +705,14 @@
           commissions = commissions.map(item => ({
             ...item,
             imageData: item.imageData || null,
+            textSetting: item.textSetting || '', // 文字设定字段
             done: item.done || false,
           }));
         } catch(e) { commissions = []; }
       } else {
         commissions = [
-          { id: Date.now() + 1, project: '精灵肖像', client: '艾琳', ddl: '2026-10-15', note: '带翅膀', imageData: null, done: false },
-          { id: Date.now() + 2, project: '机械设计', client: '铁匠', ddl: '2026-09-20', note: '参考蒸汽朋克', imageData: null, done: false },
+          { id: Date.now() + 1, project: '精灵肖像', client: '艾琳', ddl: '2026-10-15', note: '带翅膀', imageData: null, textSetting: '', done: false },
+          { id: Date.now() + 2, project: '机械设计', client: '铁匠', ddl: '2026-09-20', note: '参考蒸汽朋克', imageData: null, textSetting: '', done: false },
         ];
       }
       commissions = commissions.filter(c => c.id);
@@ -702,6 +754,7 @@
 
         const ddlDisplay = item.ddl ? item.ddl : '未设置';
         const noteDisplay = item.note ? item.note : '';
+        const textSetting = item.textSetting || '';
 
         html += `
           <div class="commission-item ${doneClass}" data-id="${item.id}">
@@ -723,6 +776,10 @@
               <div class="upload-btn-wrapper">
                 <span class="upload-btn"><i class="fas fa-upload"></i> 设定图</span>
                 <input type="file" accept="image/*" class="img-upload-input" data-id="${item.id}" />
+              </div>
+              <div class="text-setting-area">
+                <label><i class="fas fa-align-left"></i> 文字设定</label>
+                <textarea class="text-setting-input" data-id="${item.id}" placeholder="输入文字设定...">${escapeHtml(textSetting)}</textarea>
               </div>
             </div>
 
@@ -776,6 +833,23 @@
           this.value = '';
         });
       });
+
+      // 文字设定输入 - 自动保存 (防抖)
+      container.querySelectorAll('.text-setting-input').forEach(textarea => {
+        let timeoutId = null;
+        textarea.addEventListener('input', function() {
+          const id = Number(this.dataset.id);
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            updateTextSetting(id, this.value);
+          }, 400);
+        });
+        // 失去焦点时立即保存
+        textarea.addEventListener('blur', function() {
+          const id = Number(this.dataset.id);
+          updateTextSetting(id, this.value);
+        });
+      });
     }
 
     function escapeHtml(text) {
@@ -821,7 +895,6 @@
       }
     }
 
-    // 点击模态背景关闭
     document.getElementById('editModal').addEventListener('click', function(e) {
       if (e.target === this) closeEditModal();
     });
@@ -829,7 +902,6 @@
     document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
     document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
 
-    // 回车保存
     document.getElementById('editProject').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') saveEdit();
     });
@@ -856,6 +928,7 @@
         ddl: ddl || '',
         note: note.trim() || '',
         imageData: null,
+        textSetting: '',
         done: false,
       };
       commissions.push(newItem);
@@ -885,6 +958,18 @@
       if (item) {
         item.imageData = dataUrl;
         saveData();
+        render();
+      }
+    }
+
+    function updateTextSetting(id, value) {
+      const item = commissions.find(c => c.id === id);
+      if (item) {
+        item.textSetting = value;
+        saveData();
+        // 不重新渲染整个列表，只更新数据存储
+        // 但为了保持UI一致性，简单起见重新渲染
+        // 如果希望更流畅，可以只更新对应textarea，但这里为了代码简洁，直接重新渲染
         render();
       }
     }
