@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>未完成委托清单</title>
-  <!-- 字体与图标库 (轻量) -->
+  <title>未完成委托 · 毛玻璃清单</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -19,13 +18,12 @@
       display: flex;
       justify-content: center;
       padding: 2rem 1.5rem;
-      background: #f2f5f9; /* 低饱和浅蓝底色 */
+      background: #f2f5f9;
       background-image: radial-gradient(circle at 20% 30%, rgba(200, 215, 235, 0.3) 0%, transparent 30%),
                         radial-gradient(circle at 80% 70%, rgba(180, 200, 225, 0.2) 0%, transparent 40%);
       backdrop-filter: blur(2px);
     }
 
-    /* 主容器 – 毛玻璃卡片 */
     .glass-wrapper {
       max-width: 1000px;
       width: 100%;
@@ -40,7 +38,6 @@
       transition: all 0.2s ease;
     }
 
-    /* 标题区 */
     .header {
       display: flex;
       justify-content: space-between;
@@ -85,7 +82,6 @@
       color: #1f3140;
     }
 
-    /* 添加委托表单 — 毛玻璃内嵌 */
     .add-form {
       background: rgba(240, 246, 255, 0.4);
       backdrop-filter: blur(8px);
@@ -176,14 +172,12 @@
       border-color: rgba(255, 255, 255, 0.9);
     }
 
-    /* 委托列表 */
     .commission-list {
       display: flex;
       flex-direction: column;
       gap: 1.2rem;
     }
 
-    /* 单个委托卡片 — 毛玻璃 */
     .commission-item {
       background: rgba(255, 255, 255, 0.3);
       backdrop-filter: blur(12px);
@@ -217,7 +211,6 @@
       color: #5b7184;
     }
 
-    /* 主信息区 — 左 */
     .commission-info {
       flex: 2 1 280px;
       display: flex;
@@ -282,7 +275,6 @@
       word-break: break-word;
     }
 
-    /* 设定图区域 */
     .commission-image-section {
       flex: 1 1 140px;
       min-width: 120px;
@@ -371,7 +363,6 @@
       border-color: rgba(255, 255, 255, 0.8);
     }
 
-    /* 操作按钮组 */
     .commission-actions {
       display: flex;
       flex-wrap: wrap;
@@ -423,12 +414,20 @@
       border-color: rgba(180, 130, 140, 0.2);
     }
 
+    .commission-actions .btn-edit {
+      background: rgba(200, 215, 240, 0.2);
+      border-color: rgba(160, 185, 215, 0.25);
+    }
+
+    .commission-actions .btn-edit:hover {
+      background: rgba(180, 205, 235, 0.35);
+    }
+
     .commission-actions .btn-done.done-active {
       background: rgba(180, 210, 195, 0.25);
       border-color: #86a794;
     }
 
-    /* 空状态 */
     .empty-state {
       text-align: center;
       padding: 3.5rem 1rem;
@@ -445,7 +444,129 @@
       margin-bottom: 1rem;
     }
 
-    /* 响应式 */
+    /* 编辑弹窗 - 毛玻璃 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(30, 45, 65, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: rgba(245, 250, 255, 0.75);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border-radius: 3rem;
+      padding: 2.2rem 2.5rem;
+      max-width: 520px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 30px 60px rgba(80, 110, 145, 0.25);
+      animation: modalFade 0.2s ease;
+    }
+
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-box h2 {
+      font-weight: 400;
+      font-size: 1.5rem;
+      color: #1f3447;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .modal-box h2 i {
+      color: #5f7a9a;
+      opacity: 0.7;
+    }
+
+    .modal-field {
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #405a72;
+      margin-bottom: 0.2rem;
+      opacity: 0.8;
+    }
+
+    .modal-field input {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(200, 215, 235, 0.5);
+      border-radius: 2rem;
+      font-size: 0.95rem;
+      color: #1f2e3c;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .modal-field input:focus {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: #8ba9cc;
+      box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.15);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: flex-end;
+      margin-top: 1.8rem;
+    }
+
+    .modal-actions button {
+      padding: 0.6rem 1.8rem;
+      border-radius: 3rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(235, 244, 255, 0.3);
+      backdrop-filter: blur(4px);
+      font-size: 0.9rem;
+      color: #1e384f;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .modal-actions .btn-save-edit {
+      background: rgba(180, 210, 235, 0.4);
+      border-color: rgba(160, 190, 215, 0.4);
+    }
+
+    .modal-actions .btn-save-edit:hover {
+      background: rgba(160, 195, 225, 0.6);
+    }
+
+    .modal-actions .btn-cancel-edit {
+      background: rgba(220, 225, 235, 0.2);
+    }
+
+    .modal-actions .btn-cancel-edit:hover {
+      background: rgba(200, 208, 220, 0.4);
+    }
+
     @media (max-width: 680px) {
       .glass-wrapper { padding: 1.5rem; }
       .add-form { flex-direction: column; align-items: stretch; }
@@ -454,6 +575,7 @@
       .commission-image-section { align-items: center; width: 100%; }
       .image-preview-wrapper { max-width: 100%; width: 100%; aspect-ratio: 1/1; }
       .commission-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+      .modal-box { padding: 1.8rem; }
     }
   </style>
 </head>
@@ -464,7 +586,6 @@
     <div class="badge-count">待办 <span id="pendingCount">0</span></div>
   </div>
 
-  <!-- 添加委托表单 -->
   <div class="add-form">
     <div class="field-group">
       <label><i class="fas fa-tag"></i> 委托项目</label>
@@ -485,9 +606,7 @@
     <button class="btn-add" id="addBtn"><i class="fas fa-plus-circle"></i> 添加委托</button>
   </div>
 
-  <!-- 委托列表容器 -->
   <div class="commission-list" id="commissionList">
-    <!-- 动态渲染 -->
     <div class="empty-state">
       <i class="fas fa-inbox"></i>
       <p>还没有委托，添加一项吧</p>
@@ -495,18 +614,43 @@
   </div>
 </div>
 
+<!-- 编辑弹窗 -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h2><i class="fas fa-pen-to-square"></i> 编辑委托</h2>
+    <div class="modal-field">
+      <label>委托项目</label>
+      <input type="text" id="editProject" />
+    </div>
+    <div class="modal-field">
+      <label>委托人</label>
+      <input type="text" id="editClient" />
+    </div>
+    <div class="modal-field">
+      <label>DDL</label>
+      <input type="date" id="editDdl" />
+    </div>
+    <div class="modal-field">
+      <label>备注</label>
+      <input type="text" id="editNote" placeholder="备注" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel-edit" id="cancelEditBtn">取消</button>
+      <button class="btn-save-edit" id="saveEditBtn"><i class="fas fa-check"></i> 保存修改</button>
+    </div>
+  </div>
+</div>
+
 <script>
   (function() {
-    // ----- 数据存储 -----
     let commissions = [];
+    let editingId = null; // 当前编辑的委托ID
 
-    // 从 localStorage 加载
     function loadData() {
       const stored = localStorage.getItem('commissionsData');
       if (stored) {
         try {
           commissions = JSON.parse(stored);
-          // 兼容旧数据：确保每个 item 有 imageData 字段
           commissions = commissions.map(item => ({
             ...item,
             imageData: item.imageData || null,
@@ -514,13 +658,11 @@
           }));
         } catch(e) { commissions = []; }
       } else {
-        // 默认示例数据 (无图)
         commissions = [
           { id: Date.now() + 1, project: '精灵肖像', client: '艾琳', ddl: '2026-10-15', note: '带翅膀', imageData: null, done: false },
           { id: Date.now() + 2, project: '机械设计', client: '铁匠', ddl: '2026-09-20', note: '参考蒸汽朋克', imageData: null, done: false },
         ];
       }
-      // 确保每个委托有唯一 id
       commissions = commissions.filter(c => c.id);
       render();
     }
@@ -530,13 +672,11 @@
       updateBadge();
     }
 
-    // 更新待办数量
     function updateBadge() {
       const pending = commissions.filter(c => !c.done).length;
       document.getElementById('pendingCount').textContent = pending;
     }
 
-    // ----- 渲染函数 -----
     function render() {
       const container = document.getElementById('commissionList');
       if (!commissions.length) {
@@ -553,7 +693,6 @@
       let html = '';
       commissions.forEach(item => {
         const doneClass = item.done ? 'done' : '';
-        // 处理图片显示
         let imageHtml = '';
         if (item.imageData) {
           imageHtml = `<img src="${item.imageData}" alt="设定图" />`;
@@ -561,7 +700,6 @@
           imageHtml = `<div class="empty-img-placeholder"><i class="fas fa-image"></i><span>暂无设定</span></div>`;
         }
 
-        // 日期显示
         const ddlDisplay = item.ddl ? item.ddl : '未设置';
         const noteDisplay = item.note ? item.note : '';
 
@@ -589,6 +727,7 @@
             </div>
 
             <div class="commission-actions">
+              <button class="btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> 编辑</button>
               <button class="btn-done ${item.done ? 'done-active' : ''}" data-id="${item.id}">
                 <i class="fas ${item.done ? 'fa-check-circle' : 'fa-circle'}"></i> ${item.done ? '已完成' : '标记完成'}
               </button>
@@ -601,24 +740,30 @@
       container.innerHTML = html;
       updateBadge();
 
-      // 重新绑定事件 (委托)
+      // 绑定事件
       container.querySelectorAll('.btn-done').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function() {
           const id = Number(this.dataset.id);
           toggleDone(id);
         });
       });
 
       container.querySelectorAll('.btn-delete').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function() {
           const id = Number(this.dataset.id);
           deleteCommission(id);
         });
       });
 
-      // 上传图片事件 (每个卡片)
+      container.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = Number(this.dataset.id);
+          openEditModal(id);
+        });
+      });
+
       container.querySelectorAll('.img-upload-input').forEach(input => {
-        input.addEventListener('change', function(e) {
+        input.addEventListener('change', function() {
           const id = Number(this.dataset.id);
           const file = this.files[0];
           if (!file) return;
@@ -628,13 +773,11 @@
             updateImage(id, dataUrl);
           };
           reader.readAsDataURL(file);
-          // 重置input以允许重复上传同一文件
           this.value = '';
         });
       });
     }
 
-    // 辅助：转义
     function escapeHtml(text) {
       if (!text) return '';
       const div = document.createElement('div');
@@ -642,7 +785,65 @@
       return div.innerHTML;
     }
 
-    // ----- 操作函数 -----
+    // ----- 编辑弹窗 -----
+    function openEditModal(id) {
+      const item = commissions.find(c => c.id === id);
+      if (!item) return;
+      editingId = id;
+      document.getElementById('editProject').value = item.project || '';
+      document.getElementById('editClient').value = item.client || '';
+      document.getElementById('editDdl').value = item.ddl || '';
+      document.getElementById('editNote').value = item.note || '';
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+      editingId = null;
+    }
+
+    function saveEdit() {
+      if (editingId === null) return;
+      const project = document.getElementById('editProject').value.trim();
+      if (!project) {
+        alert('请填写委托项目名称');
+        return;
+      }
+      const item = commissions.find(c => c.id === editingId);
+      if (item) {
+        item.project = project;
+        item.client = document.getElementById('editClient').value.trim() || '';
+        item.ddl = document.getElementById('editDdl').value || '';
+        item.note = document.getElementById('editNote').value.trim() || '';
+        saveData();
+        render();
+        closeEditModal();
+      }
+    }
+
+    // 点击模态背景关闭
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+    document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
+
+    // 回车保存
+    document.getElementById('editProject').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') saveEdit();
+    });
+    document.getElementById('editClient').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') saveEdit();
+    });
+    document.getElementById('editDdl').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') saveEdit();
+    });
+    document.getElementById('editNote').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') saveEdit();
+    });
+
+    // ----- 业务操作 -----
     function addCommission(project, client, ddl, note) {
       if (!project.trim()) {
         alert('请填写委托项目名称');
@@ -688,25 +889,21 @@
       }
     }
 
-    // ----- 初始化与事件绑定 -----
+    // ----- 初始化 -----
     document.addEventListener('DOMContentLoaded', function() {
       loadData();
 
-      // 添加按钮
       document.getElementById('addBtn').addEventListener('click', function() {
         const project = document.getElementById('projectInput').value;
         const client = document.getElementById('clientInput').value;
         const ddl = document.getElementById('ddlInput').value;
         const note = document.getElementById('noteInput').value;
         addCommission(project, client, ddl, note);
-        // 清空部分字段 (保留ddl可能有用)
         document.getElementById('projectInput').value = '';
         document.getElementById('clientInput').value = '';
         document.getElementById('noteInput').value = '';
-        // ddl 不清空，方便连续添加
       });
 
-      // 回车快速添加 (在项目输入框)
       document.getElementById('projectInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
           document.getElementById('addBtn').click();
