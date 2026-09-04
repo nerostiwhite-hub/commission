@@ -1,1045 +1,1057 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>未完成委托清单</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 2rem 1.5rem;
-            background: #f2f5f9;
-            background-image: radial-gradient(circle at 20% 30%, rgba(200, 215, 235, 0.3) 0%, transparent 30%),
-            radial-gradient(circle at 80% 70%, rgba(180, 200, 225, 0.2) 0%, transparent 40%);
-            backdrop-filter: blur(2px);
-        }
-
-        .glass-wrapper {
-            max-width: 1000px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(14px) saturate(180%);
-            -webkit-backdrop-filter: blur(14px) saturate(180%);
-            border-radius: 3rem;
-            padding: 2rem 2rem 2.5rem;
-            box-shadow: 0 20px 40px rgba(140, 160, 190, 0.25),
-            inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.2s ease;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 2.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid rgba(160, 180, 210, 0.25);
-        }
-
-        .header h1 {
-            font-weight: 400;
-            font-size: 1.9rem;
-            letter-spacing: 1px;
-            color: #2b3a4b;
-            text-shadow: 0 2px 6px rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-        }
-
-        .header h1 i {
-            color: #5f7a9a;
-            font-size: 1.8rem;
-            opacity: 0.7;
-        }
-
-        .header .badge-count {
-            background: rgba(90, 120, 160, 0.15);
-            backdrop-filter: blur(4px);
-            padding: 0.5rem 1.4rem;
-            border-radius: 40px;
-            font-size: 0.95rem;
-            color: #2c4056;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            letter-spacing: 0.3px;
-        }
-
-        .header .badge-count span {
-            font-weight: 600;
-            color: #1f3140;
-        }
-
-        .add-form {
-            background: rgba(240, 246, 255, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 2.5rem;
-            padding: 1.5rem 1.8rem;
-            margin-bottom: 2.8rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-end;
-            gap: 1rem 1.2rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 6px 18px rgba(140, 165, 195, 0.12);
-        }
-
-        .add-form .field-group {
-            flex: 1 1 140px;
-            min-width: 120px;
-        }
-
-        .add-form label {
-            display: block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            color: #405a72;
-            margin-bottom: 0.25rem;
-            opacity: 0.8;
-            font-weight: 400;
-        }
-
-        .add-form input {
-            width: 100%;
-            padding: 0.6rem 0.9rem;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(200, 215, 235, 0.5);
-            border-radius: 2rem;
-            font-size: 0.95rem;
-            color: #1f2e3c;
-            outline: none;
-            transition: 0.2s;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.01);
-        }
-
-        .add-form input:focus {
-            background: rgba(255, 255, 255, 0.75);
-            border-color: #8ba9cc;
-            box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.2);
-        }
-
-        .add-form input::placeholder {
-            color: #8a9fb0;
-            font-weight: 300;
-            font-size: 0.9rem;
-        }
-
-        .add-form .btn-add {
-            background: #dbe7f2;
-            border: none;
-            padding: 0.6rem 2rem;
-            border-radius: 3rem;
-            font-weight: 450;
-            color: #1e364b;
-            font-size: 0.95rem;
-            backdrop-filter: blur(4px);
-            background: rgba(200, 218, 240, 0.55);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 4px 10px rgba(130, 160, 190, 0.1);
-            cursor: pointer;
-            transition: 0.15s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-left: auto;
-            letter-spacing: 0.3px;
-        }
-
-        .add-form .btn-add i {
-            font-size: 0.9rem;
-            color: #3b5b78;
-        }
-
-        .add-form .btn-add:hover {
-            background: rgba(190, 212, 235, 0.7);
-            box-shadow: 0 6px 14px rgba(110, 145, 185, 0.2);
-            transform: scale(1.01);
-            border-color: rgba(255, 255, 255, 0.9);
-        }
-
-        .commission-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .commission-item {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 2.2rem;
-            padding: 1.5rem 1.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 20px rgba(140, 165, 195, 0.08);
-            transition: 0.2s;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap: 1rem 1.5rem;
-        }
-
-        .commission-item:hover {
-            background: rgba(255, 255, 255, 0.45);
-            border-color: rgba(200, 218, 240, 0.6);
-            box-shadow: 0 12px 28px rgba(120, 150, 185, 0.1);
-        }
-
-        .commission-item.done {
-            opacity: 0.7;
-            filter: grayscale(0.3);
-            background: rgba(235, 242, 250, 0.25);
-            border-color: rgba(180, 200, 220, 0.3);
-        }
-
-        .commission-item.done .commission-title {
-            text-decoration: line-through;
-            color: #5b7184;
-        }
-
-        .commission-info {
-            flex: 2 1 280px;
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .commission-header {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.6rem 1rem;
-        }
-
-        .commission-title {
-            font-size: 1.25rem;
-            font-weight: 500;
-            color: #1d3140;
-            letter-spacing: -0.2px;
-            word-break: break-word;
-        }
-
-        .commission-meta {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 1.2rem 1.8rem;
-            font-size: 0.9rem;
-            color: #335066;
-            margin-top: 0.2rem;
-        }
-
-        .commission-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(215, 230, 248, 0.3);
-            backdrop-filter: blur(4px);
-            padding: 0.2rem 0.9rem 0.2rem 0.6rem;
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .commission-meta i {
-            color: #52718e;
-            font-size: 0.8rem;
-            width: 1.2rem;
-            text-align: center;
-        }
-
-        .commission-note {
-            margin-top: 0.2rem;
-            font-size: 0.9rem;
-            color: #3d5a72;
-            background: rgba(225, 238, 252, 0.2);
-            padding: 0.3rem 1rem;
-            border-radius: 30px;
-            display: inline-block;
-            backdrop-filter: blur(2px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            max-width: 100%;
-            word-break: break-word;
-        }
-
-        /* 设定图 + 文字设定 区域 */
-        .commission-image-section {
-            flex: 1 1 140px;
-            min-width: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.4rem;
-        }
-
-        .image-preview-wrapper {
-            width: 100%;
-            max-width: 160px;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            background: rgba(210, 225, 245, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(4px);
-            aspect-ratio: 1 / 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .image-preview-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .image-preview-wrapper .empty-img-placeholder {
-            color: #5c7b97;
-            font-size: 0.7rem;
-            opacity: 0.5;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .image-preview-wrapper .empty-img-placeholder i {
-            font-size: 1.6rem;
-            opacity: 0.4;
-        }
-
-        .upload-btn-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .upload-btn-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .upload-btn {
-            background: rgba(215, 230, 248, 0.3);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 3rem;
-            padding: 0.25rem 0.9rem;
-            font-size: 0.75rem;
-            color: #2a4b65;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.15s;
-            width: auto;
-            cursor: default;
-        }
-
-        .upload-btn i {
-            font-size: 0.8rem;
-        }
-
-        .upload-btn-wrapper:hover .upload-btn {
-            background: rgba(195, 216, 240, 0.5);
-            border-color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* 文字设定显示 */
-        .text-setting-display {
-            width: 100%;
-            max-width: 160px;
-            background: rgba(215, 230, 248, 0.15);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 1rem;
-            padding: 0.4rem 0.7rem;
-            font-size: 0.75rem;
-            color: #2a4b65;
-            word-break: break-word;
-            min-height: 2.2rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .text-setting-display .empty-text {
-            opacity: 0.4;
-            font-style: italic;
-        }
-
-        .commission-actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 0.4rem 0.8rem;
-            margin-left: auto;
-            flex: 0 0 auto;
-        }
-
-        .commission-actions button {
-            background: rgba(235, 244, 255, 0.3);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            border-radius: 3rem;
-            padding: 0.3rem 0.9rem;
-            font-size: 0.8rem;
-            color: #1e384f;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.1s;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-            letter-spacing: 0.2px;
-        }
-
-        .commission-actions button i {
-            font-size: 0.8rem;
-            color: #3f607d;
-        }
-
-        .commission-actions .btn-done {
-            background: rgba(190, 215, 240, 0.25);
-            border-color: rgba(150, 185, 215, 0.3);
-        }
-
-        .commission-actions .btn-done:hover {
-            background: rgba(160, 200, 230, 0.4);
-        }
-
-        .commission-actions .btn-delete {
-            background: rgba(220, 210, 215, 0.15);
-            border-color: rgba(180, 160, 170, 0.2);
-            color: #4b4f5e;
-        }
-
-        .commission-actions .btn-delete:hover {
-            background: rgba(200, 170, 175, 0.25);
-            border-color: rgba(180, 130, 140, 0.2);
-        }
-
-        .commission-actions .btn-edit {
-            background: rgba(200, 215, 240, 0.2);
-            border-color: rgba(160, 185, 215, 0.25);
-        }
-
-        .commission-actions .btn-edit:hover {
-            background: rgba(180, 205, 235, 0.35);
-        }
-
-        .commission-actions .btn-done.done-active {
-            background: rgba(180, 210, 195, 0.25);
-            border-color: #86a794;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3.5rem 1rem;
-            color: #4d6a82;
-            background: rgba(240, 246, 255, 0.15);
-            backdrop-filter: blur(6px);
-            border-radius: 3rem;
-            border: 1px dashed rgba(160, 185, 210, 0.3);
-        }
-
-        .empty-state i {
-            font-size: 2.8rem;
-            opacity: 0.3;
-            margin-bottom: 1rem;
-        }
-
-        /* 编辑弹窗 - 毛玻璃 */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(30, 45, 65, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1.5rem;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-box {
-            background: rgba(245, 250, 255, 0.75);
-            backdrop-filter: blur(20px) saturate(200%);
-            -webkit-backdrop-filter: blur(20px) saturate(200%);
-            border-radius: 3rem;
-            padding: 2.2rem 2.5rem;
-            max-width: 560px;
-            width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 30px 60px rgba(80, 110, 145, 0.25);
-            animation: modalFade 0.2s ease;
-        }
-
-        @keyframes modalFade {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .modal-box h2 {
-            font-weight: 400;
-            font-size: 1.5rem;
-            color: #1f3447;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .modal-box h2 i {
-            color: #5f7a9a;
-            opacity: 0.7;
-        }
-
-        .modal-field {
-            margin-bottom: 1.2rem;
-        }
-
-        .modal-field label {
-            display: block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #405a72;
-            margin-bottom: 0.2rem;
-            opacity: 0.8;
-        }
-
-        .modal-field input,
-        .modal-field textarea {
-            width: 100%;
-            padding: 0.6rem 1rem;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(200, 215, 235, 0.5);
-            border-radius: 2rem;
-            font-size: 0.95rem;
-            color: #1f2e3c;
-            outline: none;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-
-        .modal-field textarea {
-            border-radius: 1.5rem;
-            padding: 0.8rem 1rem;
-            resize: vertical;
-            min-height: 80px;
-            line-height: 1.5;
-        }
-
-        .modal-field input:focus,
-        .modal-field textarea:focus {
-            background: rgba(255, 255, 255, 0.8);
-            border-color: #8ba9cc;
-            box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.15);
-        }
-
-        /* 文字设定切换按钮 */
-        .modal-toggle-row {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .modal-toggle-row .toggle-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #405a72;
-            opacity: 0.8;
-        }
-
-        .btn-toggle-text-setting {
-            background: rgba(200, 215, 240, 0.25);
-            border: 1px solid rgba(160, 185, 215, 0.3);
-            border-radius: 3rem;
-            padding: 0.3rem 1.2rem;
-            font-size: 0.8rem;
-            color: #1e384f;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: 0.15s;
-            backdrop-filter: blur(4px);
-        }
-
-        .btn-toggle-text-setting:hover {
-            background: rgba(180, 205, 235, 0.4);
-        }
-
-        .btn-toggle-text-setting i {
-            font-size: 0.8rem;
-        }
-
-        .text-setting-area {
-            display: none;
-            margin-top: 0.5rem;
-        }
-
-        .text-setting-area.visible {
-            display: block;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 0.8rem;
-            justify-content: flex-end;
-            margin-top: 1.8rem;
-        }
-
-        .modal-actions button {
-            padding: 0.6rem 1.8rem;
-            border-radius: 3rem;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            background: rgba(235, 244, 255, 0.3);
-            backdrop-filter: blur(4px);
-            font-size: 0.9rem;
-            color: #1e384f;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-
-        .modal-actions .btn-save-edit {
-            background: rgba(180, 210, 235, 0.4);
-            border-color: rgba(160, 190, 215, 0.4);
-        }
-
-        .modal-actions .btn-save-edit:hover {
-            background: rgba(160, 195, 225, 0.6);
-        }
-
-        .modal-actions .btn-cancel-edit {
-            background: rgba(220, 225, 235, 0.2);
-        }
-
-        .modal-actions .btn-cancel-edit:hover {
-            background: rgba(200, 208, 220, 0.4);
-        }
-
-        @media (max-width: 680px) {
-            .glass-wrapper { padding: 1.5rem; }
-            .add-form { flex-direction: column; align-items: stretch; }
-            .add-form .btn-add { margin-left: 0; justify-content: center; }
-            .commission-item { flex-direction: column; }
-            .commission-image-section { align-items: center; width: 100%; }
-            .image-preview-wrapper { max-width: 100%; width: 100%; aspect-ratio: 1/1; }
-            .text-setting-display { max-width: 100%; width: 100%; }
-            .commission-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
-            .modal-box { padding: 1.8rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>未完成委托清单</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      background: #f2f5f9;
+      background-image: radial-gradient(circle at 20% 30%, rgba(200, 215, 235, 0.3) 0%, transparent 30%),
+                        radial-gradient(circle at 80% 70%, rgba(180, 200, 225, 0.2) 0%, transparent 40%);
+      backdrop-filter: blur(2px);
+    }
+
+    .glass-wrapper {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-radius: 3rem;
+      padding: 2rem 2rem 2.5rem;
+      box-shadow: 0 20px 40px rgba(140, 160, 190, 0.25),
+                  inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(160, 180, 210, 0.25);
+    }
+
+    .header h1 {
+      font-weight: 400;
+      font-size: 1.9rem;
+      letter-spacing: 1px;
+      color: #2b3a4b;
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .header h1 i {
+      color: #5f7a9a;
+      font-size: 1.8rem;
+      opacity: 0.7;
+    }
+
+    .header .badge-count {
+      background: rgba(90, 120, 160, 0.15);
+      backdrop-filter: blur(4px);
+      padding: 0.5rem 1.4rem;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      color: #2c4056;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      letter-spacing: 0.3px;
+    }
+
+    .header .badge-count span {
+      font-weight: 600;
+      color: #1f3140;
+    }
+
+    .add-form {
+      background: rgba(240, 246, 255, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 2.5rem;
+      padding: 1.5rem 1.8rem;
+      margin-bottom: 2.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 1rem 1.2rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 6px 18px rgba(140, 165, 195, 0.12);
+    }
+
+    .add-form .field-group {
+      flex: 1 1 140px;
+      min-width: 120px;
+    }
+
+    .add-form label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #405a72;
+      margin-bottom: 0.25rem;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+
+    .add-form input {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(200, 215, 235, 0.5);
+      border-radius: 2rem;
+      font-size: 0.95rem;
+      color: #1f2e3c;
+      outline: none;
+      transition: 0.2s;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.01);
+    }
+
+    .add-form input:focus {
+      background: rgba(255, 255, 255, 0.75);
+      border-color: #8ba9cc;
+      box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.2);
+    }
+
+    .add-form input::placeholder {
+      color: #8a9fb0;
+      font-weight: 300;
+      font-size: 0.9rem;
+    }
+
+    .add-form .btn-add {
+      background: #dbe7f2;
+      border: none;
+      padding: 0.6rem 2rem;
+      border-radius: 3rem;
+      font-weight: 450;
+      color: #1e364b;
+      font-size: 0.95rem;
+      backdrop-filter: blur(4px);
+      background: rgba(200, 218, 240, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 10px rgba(130, 160, 190, 0.1);
+      cursor: pointer;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+      letter-spacing: 0.3px;
+    }
+
+    .add-form .btn-add i {
+      font-size: 0.9rem;
+      color: #3b5b78;
+    }
+
+    .add-form .btn-add:hover {
+      background: rgba(190, 212, 235, 0.7);
+      box-shadow: 0 6px 14px rgba(110, 145, 185, 0.2);
+      transform: scale(1.01);
+      border-color: rgba(255, 255, 255, 0.9);
+    }
+
+    .commission-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .commission-item {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 2.2rem;
+      padding: 1.5rem 1.8rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 8px 20px rgba(140, 165, 195, 0.08);
+      transition: 0.2s;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1rem 1.5rem;
+    }
+
+    .commission-item:hover {
+      background: rgba(255, 255, 255, 0.45);
+      border-color: rgba(200, 218, 240, 0.6);
+      box-shadow: 0 12px 28px rgba(120, 150, 185, 0.1);
+    }
+
+    .commission-item.done {
+      opacity: 0.7;
+      filter: grayscale(0.3);
+      background: rgba(235, 242, 250, 0.25);
+      border-color: rgba(180, 200, 220, 0.3);
+    }
+
+    .commission-item.done .commission-title {
+      text-decoration: line-through;
+      color: #5b7184;
+    }
+
+    .commission-info {
+      flex: 2 1 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .commission-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+    }
+
+    .commission-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #1d3140;
+      letter-spacing: -0.2px;
+      word-break: break-word;
+    }
+
+    .commission-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.2rem 1.8rem;
+      font-size: 0.9rem;
+      color: #335066;
+      margin-top: 0.2rem;
+    }
+
+    .commission-meta span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(215, 230, 248, 0.3);
+      backdrop-filter: blur(4px);
+      padding: 0.2rem 0.9rem 0.2rem 0.6rem;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .commission-meta i {
+      color: #52718e;
+      font-size: 0.8rem;
+      width: 1.2rem;
+      text-align: center;
+    }
+
+    .commission-note {
+      margin-top: 0.2rem;
+      font-size: 0.9rem;
+      color: #3d5a72;
+      background: rgba(225, 238, 252, 0.2);
+      padding: 0.3rem 1rem;
+      border-radius: 30px;
+      display: inline-block;
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .commission-image-section {
+      flex: 1 1 140px;
+      min-width: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+
+    .image-preview-wrapper {
+      width: 100%;
+      max-width: 160px;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      background: rgba(210, 225, 245, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .image-preview-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-preview-wrapper .empty-img-placeholder {
+      color: #5c7b97;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .image-preview-wrapper .empty-img-placeholder i {
+      font-size: 1.6rem;
+      opacity: 0.4;
+    }
+
+    .upload-btn-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .upload-btn-wrapper input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .upload-btn {
+      background: rgba(215, 230, 248, 0.3);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 3rem;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.75rem;
+      color: #2a4b65;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s;
+      width: auto;
+      cursor: default;
+    }
+
+    .upload-btn i {
+      font-size: 0.8rem;
+    }
+
+    .upload-btn-wrapper:hover .upload-btn {
+      background: rgba(195, 216, 240, 0.5);
+      border-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .commission-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem 0.8rem;
+      margin-left: auto;
+      flex: 0 0 auto;
+    }
+
+    .commission-actions button {
+      background: rgba(235, 244, 255, 0.3);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 3rem;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.8rem;
+      color: #1e384f;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.1s;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      letter-spacing: 0.2px;
+    }
+
+    .commission-actions button i {
+      font-size: 0.8rem;
+      color: #3f607d;
+    }
+
+    .commission-actions .btn-done {
+      background: rgba(190, 215, 240, 0.25);
+      border-color: rgba(150, 185, 215, 0.3);
+    }
+
+    .commission-actions .btn-done:hover {
+      background: rgba(160, 200, 230, 0.4);
+    }
+
+    .commission-actions .btn-delete {
+      background: rgba(220, 210, 215, 0.15);
+      border-color: rgba(180, 160, 170, 0.2);
+      color: #4b4f5e;
+    }
+
+    .commission-actions .btn-delete:hover {
+      background: rgba(200, 170, 175, 0.25);
+      border-color: rgba(180, 130, 140, 0.2);
+    }
+
+    .commission-actions .btn-edit {
+      background: rgba(200, 215, 240, 0.2);
+      border-color: rgba(160, 185, 215, 0.25);
+    }
+
+    .commission-actions .btn-edit:hover {
+      background: rgba(180, 205, 235, 0.35);
+    }
+
+    .commission-actions .btn-text-setting {
+      background: rgba(200, 220, 245, 0.2);
+      border-color: rgba(160, 185, 215, 0.25);
+    }
+
+    .commission-actions .btn-text-setting:hover {
+      background: rgba(180, 205, 235, 0.35);
+    }
+
+    .commission-actions .btn-done.done-active {
+      background: rgba(180, 210, 195, 0.25);
+      border-color: #86a794;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #4d6a82;
+      background: rgba(240, 246, 255, 0.15);
+      backdrop-filter: blur(6px);
+      border-radius: 3rem;
+      border: 1px dashed rgba(160, 185, 210, 0.3);
+    }
+
+    .empty-state i {
+      font-size: 2.8rem;
+      opacity: 0.3;
+      margin-bottom: 1rem;
+    }
+
+    /* 编辑弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(30, 45, 65, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: rgba(245, 250, 255, 0.75);
+      backdrop-filter: blur(20px) saturate(200%);
+      -webkit-backdrop-filter: blur(20px) saturate(200%);
+      border-radius: 3rem;
+      padding: 2.2rem 2.5rem;
+      max-width: 520px;
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 30px 60px rgba(80, 110, 145, 0.25);
+      animation: modalFade 0.2s ease;
+    }
+
+    .modal-box.text-setting-modal {
+      max-width: 580px;
+    }
+
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-box h2 {
+      font-weight: 400;
+      font-size: 1.5rem;
+      color: #1f3447;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .modal-box h2 i {
+      color: #5f7a9a;
+      opacity: 0.7;
+    }
+
+    .modal-field {
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #405a72;
+      margin-bottom: 0.2rem;
+      opacity: 0.8;
+    }
+
+    .modal-field input,
+    .modal-field textarea {
+      width: 100%;
+      padding: 0.6rem 1rem;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(200, 215, 235, 0.5);
+      border-radius: 1.2rem;
+      font-size: 0.95rem;
+      color: #1f2e3c;
+      outline: none;
+      transition: 0.2s;
+      font-family: inherit;
+    }
+
+    .modal-field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .modal-field input:focus,
+    .modal-field textarea:focus {
+      background: rgba(255, 255, 255, 0.8);
+      border-color: #8ba9cc;
+      box-shadow: 0 0 0 3px rgba(140, 180, 220, 0.15);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: flex-end;
+      margin-top: 1.8rem;
+    }
+
+    .modal-actions button {
+      padding: 0.6rem 1.8rem;
+      border-radius: 3rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      background: rgba(235, 244, 255, 0.3);
+      backdrop-filter: blur(4px);
+      font-size: 0.9rem;
+      color: #1e384f;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .modal-actions .btn-save-edit {
+      background: rgba(180, 210, 235, 0.4);
+      border-color: rgba(160, 190, 215, 0.4);
+    }
+
+    .modal-actions .btn-save-edit:hover {
+      background: rgba(160, 195, 225, 0.6);
+    }
+
+    .modal-actions .btn-cancel-edit {
+      background: rgba(220, 225, 235, 0.2);
+    }
+
+    .modal-actions .btn-cancel-edit:hover {
+      background: rgba(200, 208, 220, 0.4);
+    }
+
+    /* 文字设定预览小标签 */
+    .text-setting-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: #4a6a85;
+      background: rgba(200, 218, 240, 0.2);
+      padding: 0.1rem 0.7rem;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      margin-top: 0.2rem;
+    }
+
+    .text-setting-badge i {
+      font-size: 0.65rem;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 680px) {
+      .glass-wrapper { padding: 1.5rem; }
+      .add-form { flex-direction: column; align-items: stretch; }
+      .add-form .btn-add { margin-left: 0; justify-content: center; }
+      .commission-item { flex-direction: column; }
+      .commission-image-section { align-items: center; width: 100%; }
+      .image-preview-wrapper { max-width: 100%; width: 100%; aspect-ratio: 1/1; }
+      .commission-actions { margin-left: 0; width: 100%; justify-content: flex-end; }
+      .modal-box { padding: 1.8rem; }
+    }
+  </style>
 </head>
 <body>
 <div class="glass-wrapper">
-    <div class="header">
-        <h1><i class="fas fa-clipboard-list"></i> 未完成委托</h1>
-        <div class="badge-count">待办 <span id="pendingCount">0</span></div>
-    </div>
+  <div class="header">
+    <h1><i class="fas fa-clipboard-list"></i> 未完成委托</h1>
+    <div class="badge-count">待办 <span id="pendingCount">0</span></div>
+  </div>
 
-    <div class="add-form">
-        <div class="field-group">
-            <label><i class="fas fa-tag"></i> 委托项目</label>
-            <input type="text" id="projectInput" placeholder="如: 角色立绘" />
-        </div>
-        <div class="field-group">
-            <label><i class="fas fa-user"></i> 委托人</label>
-            <input type="text" id="clientInput" placeholder="委托人" />
-        </div>
-        <div class="field-group">
-            <label><i class="fas fa-calendar-day"></i> DDL</label>
-            <input type="date" id="ddlInput" />
-        </div>
-        <div class="field-group">
-            <label><i class="fas fa-pen"></i> 备注</label>
-            <input type="text" id="noteInput" placeholder="备注 (选填)" />
-        </div>
-        <button class="btn-add" id="addBtn"><i class="fas fa-plus-circle"></i> 添加委托</button>
+  <div class="add-form">
+    <div class="field-group">
+      <label><i class="fas fa-tag"></i> 委托项目</label>
+      <input type="text" id="projectInput" placeholder="如: 角色立绘" />
     </div>
+    <div class="field-group">
+      <label><i class="fas fa-user"></i> 委托人</label>
+      <input type="text" id="clientInput" placeholder="委托人" />
+    </div>
+    <div class="field-group">
+      <label><i class="fas fa-calendar-day"></i> DDL</label>
+      <input type="date" id="ddlInput" />
+    </div>
+    <div class="field-group">
+      <label><i class="fas fa-pen"></i> 备注</label>
+      <input type="text" id="noteInput" placeholder="备注 (选填)" />
+    </div>
+    <button class="btn-add" id="addBtn"><i class="fas fa-plus-circle"></i> 添加委托</button>
+  </div>
 
-    <div class="commission-list" id="commissionList">
-        <div class="empty-state">
-            <i class="fas fa-inbox"></i>
-            <p>还没有委托，添加一项吧</p>
-        </div>
+  <div class="commission-list" id="commissionList">
+    <div class="empty-state">
+      <i class="fas fa-inbox"></i>
+      <p>还没有委托，添加一项吧</p>
     </div>
+  </div>
 </div>
 
-<!-- 编辑弹窗 -->
+<!-- 编辑弹窗 (基础信息) -->
 <div class="modal-overlay" id="editModal">
-    <div class="modal-box">
-        <h2><i class="fas fa-pen-to-square"></i> 编辑委托</h2>
-        <div class="modal-field">
-            <label>委托项目</label>
-            <input type="text" id="editProject" />
-        </div>
-        <div class="modal-field">
-            <label>委托人</label>
-            <input type="text" id="editClient" />
-        </div>
-        <div class="modal-field">
-            <label>DDL</label>
-            <input type="date" id="editDdl" />
-        </div>
-        <div class="modal-field">
-            <label>备注</label>
-            <input type="text" id="editNote" placeholder="备注" />
-        </div>
-
-        <!-- 文字设定切换区域 -->
-        <div class="modal-toggle-row">
-            <span class="toggle-label"><i class="fas fa-pencil-alt"></i> 文字设定</span>
-            <button class="btn-toggle-text-setting" id="toggleTextSettingBtn">
-                <i class="fas fa-chevron-down"></i> 展开
-            </button>
-        </div>
-        <div class="text-setting-area" id="textSettingArea">
-            <div class="modal-field">
-                <label>文字设定内容</label>
-                <textarea id="editTextSetting" placeholder="输入角色的文字设定、背景故事或详细描述…"></textarea>
-            </div>
-        </div>
-
-        <div class="modal-actions">
-            <button class="btn-cancel-edit" id="cancelEditBtn">取消</button>
-            <button class="btn-save-edit" id="saveEditBtn"><i class="fas fa-check"></i> 保存修改</button>
-        </div>
+  <div class="modal-box">
+    <h2><i class="fas fa-pen-to-square"></i> 编辑委托</h2>
+    <div class="modal-field">
+      <label>委托项目</label>
+      <input type="text" id="editProject" />
     </div>
+    <div class="modal-field">
+      <label>委托人</label>
+      <input type="text" id="editClient" />
+    </div>
+    <div class="modal-field">
+      <label>DDL</label>
+      <input type="date" id="editDdl" />
+    </div>
+    <div class="modal-field">
+      <label>备注</label>
+      <input type="text" id="editNote" placeholder="备注" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel-edit" id="cancelEditBtn">取消</button>
+      <button class="btn-save-edit" id="saveEditBtn"><i class="fas fa-check"></i> 保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- 文字设定弹窗 (性格/背景故事/锚点) -->
+<div class="modal-overlay" id="textSettingModal">
+  <div class="modal-box text-setting-modal">
+    <h2><i class="fas fa-font"></i> 文字设定</h2>
+    <div class="modal-field">
+      <label><i class="fas fa-user-tag"></i> 性格</label>
+      <textarea id="textPersonality" placeholder="描述角色的性格特点..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label><i class="fas fa-book-open"></i> 背景故事</label>
+      <textarea id="textBackground" placeholder="角色的背景故事..."></textarea>
+    </div>
+    <div class="modal-field">
+      <label><i class="fas fa-anchor"></i> 锚点</label>
+      <textarea id="textAnchor" placeholder="关键锚点、标志性特征..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel-edit" id="cancelTextBtn">取消</button>
+      <button class="btn-save-edit" id="saveTextBtn"><i class="fas fa-check"></i> 保存设定</button>
+    </div>
+  </div>
 </div>
 
 <script>
-    (function() {
-        let commissions = [];
-        let editingId = null;
+  (function() {
+    let commissions = [];
+    let editingId = null;          // 编辑基础信息时使用
+    let textSettingId = null;      // 文字设定时使用
 
-        function loadData() {
-            const stored = localStorage.getItem('commissionsData');
-            if (stored) {
-                try {
-                    commissions = JSON.parse(stored);
-                    commissions = commissions.map(item => ({
-                        ...item,
-                        imageData: item.imageData || null,
-                        textSetting: item.textSetting || '', // 新增文字设定字段
-                        done: item.done || false,
-                    }));
-                } catch(e) { commissions = []; }
-            } else {
-                commissions = [
-                    { id: Date.now() + 1, project: '精灵肖像', client: '艾琳', ddl: '2026-10-15', note: '带翅膀', imageData: null, textSetting: '', done: false },
-                    { id: Date.now() + 2, project: '机械设计', client: '铁匠', ddl: '2026-09-20', note: '参考蒸汽朋克', imageData: null, textSetting: '', done: false },
-                ];
-            }
-            commissions = commissions.filter(c => c.id);
-            render();
+    function loadData() {
+      const stored = localStorage.getItem('commissionsData');
+      if (stored) {
+        try {
+          commissions = JSON.parse(stored);
+          commissions = commissions.map(item => ({
+            ...item,
+            imageData: item.imageData || null,
+            done: item.done || false,
+            // 文字设定字段
+            personality: item.personality || '',
+            background: item.background || '',
+            anchor: item.anchor || '',
+          }));
+        } catch(e) { commissions = []; }
+      } else {
+        commissions = [
+          { 
+            id: Date.now() + 1, 
+            project: '精灵肖像', 
+            client: '艾琳', 
+            ddl: '2026-10-15', 
+            note: '带翅膀', 
+            imageData: null, 
+            done: false,
+            personality: '温柔优雅',
+            background: '来自森林的精灵公主',
+            anchor: '银色长发'
+          },
+          { 
+            id: Date.now() + 2, 
+            project: '机械设计', 
+            client: '铁匠', 
+            ddl: '2026-09-20', 
+            note: '参考蒸汽朋克', 
+            imageData: null, 
+            done: false,
+            personality: '',
+            background: '',
+            anchor: ''
+          },
+        ];
+      }
+      commissions = commissions.filter(c => c.id);
+      render();
+    }
+
+    function saveData() {
+      localStorage.setItem('commissionsData', JSON.stringify(commissions));
+      updateBadge();
+    }
+
+    function updateBadge() {
+      const pending = commissions.filter(c => !c.done).length;
+      document.getElementById('pendingCount').textContent = pending;
+    }
+
+    function render() {
+      const container = document.getElementById('commissionList');
+      if (!commissions.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>还没有委托，添加一项吧</p>
+          </div>
+        `;
+        updateBadge();
+        return;
+      }
+
+      let html = '';
+      commissions.forEach(item => {
+        const doneClass = item.done ? 'done' : '';
+        let imageHtml = '';
+        if (item.imageData) {
+          imageHtml = `<img src="${item.imageData}" alt="设定图" />`;
+        } else {
+          imageHtml = `<div class="empty-img-placeholder"><i class="fas fa-image"></i><span>暂无设定</span></div>`;
         }
 
-        function saveData() {
-            localStorage.setItem('commissionsData', JSON.stringify(commissions));
-            updateBadge();
-        }
+        const ddlDisplay = item.ddl ? item.ddl : '未设置';
+        const noteDisplay = item.note ? item.note : '';
+        // 检查是否有文字设定内容
+        const hasTextSetting = (item.personality && item.personality.trim()) || 
+                               (item.background && item.background.trim()) || 
+                               (item.anchor && item.anchor.trim());
 
-        function updateBadge() {
-            const pending = commissions.filter(c => !c.done).length;
-            document.getElementById('pendingCount').textContent = pending;
-        }
+        html += `
+          <div class="commission-item ${doneClass}" data-id="${item.id}">
+            <div class="commission-info">
+              <div class="commission-header">
+                <span class="commission-title">${escapeHtml(item.project) || '未命名委托'}</span>
+                ${hasTextSetting ? `<span class="text-setting-badge"><i class="fas fa-font"></i> 有文字设定</span>` : ''}
+              </div>
+              <div class="commission-meta">
+                <span><i class="fas fa-user"></i> ${escapeHtml(item.client) || '未指定'}</span>
+                <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(ddlDisplay)}</span>
+              </div>
+              ${noteDisplay ? `<div class="commission-note"><i class="fas fa-pen" style="margin-right:6px;opacity:0.7;"></i>${escapeHtml(noteDisplay)}</div>` : ''}
+            </div>
 
-        function render() {
-            const container = document.getElementById('commissionList');
-            if (!commissions.length) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
-                        <p>还没有委托，添加一项吧</p>
-                    </div>
-                `;
-                updateBadge();
-                return;
-            }
+            <div class="commission-image-section">
+              <div class="image-preview-wrapper" id="preview-${item.id}">
+                ${imageHtml}
+              </div>
+              <div class="upload-btn-wrapper">
+                <span class="upload-btn"><i class="fas fa-upload"></i> 设定图</span>
+                <input type="file" accept="image/*" class="img-upload-input" data-id="${item.id}" />
+              </div>
+            </div>
 
-            let html = '';
-            commissions.forEach(item => {
-                const doneClass = item.done ? 'done' : '';
-                let imageHtml = '';
-                if (item.imageData) {
-                    imageHtml = `<img src="${item.imageData}" alt="设定图" />`;
-                } else {
-                    imageHtml = `<div class="empty-img-placeholder"><i class="fas fa-image"></i><span>暂无设定</span></div>`;
-                }
+            <div class="commission-actions">
+              <button class="btn-text-setting" data-id="${item.id}"><i class="fas fa-font"></i> 文字设定</button>
+              <button class="btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> 编辑</button>
+              <button class="btn-done ${item.done ? 'done-active' : ''}" data-id="${item.id}">
+                <i class="fas ${item.done ? 'fa-check-circle' : 'fa-circle'}"></i> ${item.done ? '已完成' : '标记完成'}
+              </button>
+              <button class="btn-delete" data-id="${item.id}"><i class="fas fa-trash-alt"></i> 删除</button>
+            </div>
+          </div>
+        `;
+      });
 
-                const ddlDisplay = item.ddl ? item.ddl : '未设置';
-                const noteDisplay = item.note ? item.note : '';
-                const textSettingDisplay = item.textSetting ? item.textSetting : '';
+      container.innerHTML = html;
+      updateBadge();
 
-                html += `
-                    <div class="commission-item ${doneClass}" data-id="${item.id}">
-                        <div class="commission-info">
-                            <div class="commission-header">
-                                <span class="commission-title">${escapeHtml(item.project) || '未命名委托'}</span>
-                            </div>
-                            <div class="commission-meta">
-                                <span><i class="fas fa-user"></i> ${escapeHtml(item.client) || '未指定'}</span>
-                                <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(ddlDisplay)}</span>
-                            </div>
-                            ${noteDisplay ? `<div class="commission-note"><i class="fas fa-pen" style="margin-right:6px;opacity:0.7;"></i>${escapeHtml(noteDisplay)}</div>` : ''}
-                        </div>
-
-                        <div class="commission-image-section">
-                            <div class="image-preview-wrapper" id="preview-${item.id}">
-                                ${imageHtml}
-                            </div>
-                            <div class="upload-btn-wrapper">
-                                <span class="upload-btn"><i class="fas fa-upload"></i> 设定图</span>
-                                <input type="file" accept="image/*" class="img-upload-input" data-id="${item.id}" />
-                            </div>
-                            <!-- 文字设定显示 -->
-                            <div class="text-setting-display">
-                                ${textSettingDisplay ? escapeHtml(textSettingDisplay) : '<span class="empty-text">暂无文字设定</span>'}
-                            </div>
-                        </div>
-
-                        <div class="commission-actions">
-                            <button class="btn-edit" data-id="${item.id}"><i class="fas fa-edit"></i> 编辑</button>
-                            <button class="btn-done ${item.done ? 'done-active' : ''}" data-id="${item.id}">
-                                <i class="fas ${item.done ? 'fa-check-circle' : 'fa-circle'}"></i> ${item.done ? '已完成' : '标记完成'}
-                            </button>
-                            <button class="btn-delete" data-id="${item.id}"><i class="fas fa-trash-alt"></i> 删除</button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-            updateBadge();
-
-            // 绑定事件
-            container.querySelectorAll('.btn-done').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = Number(this.dataset.id);
-                    toggleDone(id);
-                });
-            });
-
-            container.querySelectorAll('.btn-delete').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = Number(this.dataset.id);
-                    deleteCommission(id);
-                });
-            });
-
-            container.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const id = Number(this.dataset.id);
-                    openEditModal(id);
-                });
-            });
-
-            container.querySelectorAll('.img-upload-input').forEach(input => {
-                input.addEventListener('change', function() {
-                    const id = Number(this.dataset.id);
-                    const file = this.files[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = function(ev) {
-                        const dataUrl = ev.target.result;
-                        updateImage(id, dataUrl);
-                    };
-                    reader.readAsDataURL(file);
-                    this.value = '';
-                });
-            });
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ----- 编辑弹窗 -----
-        let textSettingVisible = false;
-
-        function openEditModal(id) {
-            const item = commissions.find(c => c.id === id);
-            if (!item) return;
-            editingId = id;
-            document.getElementById('editProject').value = item.project || '';
-            document.getElementById('editClient').value = item.client || '';
-            document.getElementById('editDdl').value = item.ddl || '';
-            document.getElementById('editNote').value = item.note || '';
-            document.getElementById('editTextSetting').value = item.textSetting || '';
-
-            // 默认收起文字设定
-            textSettingVisible = false;
-            document.getElementById('textSettingArea').classList.remove('visible');
-            document.getElementById('toggleTextSettingBtn').innerHTML = '<i class="fas fa-chevron-down"></i> 展开';
-
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-            editingId = null;
-        }
-
-        function saveEdit() {
-            if (editingId === null) return;
-            const project = document.getElementById('editProject').value.trim();
-            if (!project) {
-                alert('请填写委托项目名称');
-                return;
-            }
-            const item = commissions.find(c => c.id === editingId);
-            if (item) {
-                item.project = project;
-                item.client = document.getElementById('editClient').value.trim() || '';
-                item.ddl = document.getElementById('editDdl').value || '';
-                item.note = document.getElementById('editNote').value.trim() || '';
-                item.textSetting = document.getElementById('editTextSetting').value.trim() || '';
-                saveData();
-                render();
-                closeEditModal();
-            }
-        }
-
-        // 文字设定展开/收起
-        document.getElementById('toggleTextSettingBtn').addEventListener('click', function() {
-            const area = document.getElementById('textSettingArea');
-            textSettingVisible = !textSettingVisible;
-            if (textSettingVisible) {
-                area.classList.add('visible');
-                this.innerHTML = '<i class="fas fa-chevron-up"></i> 收起';
-            } else {
-                area.classList.remove('visible');
-                this.innerHTML = '<i class="fas fa-chevron-down"></i> 展开';
-            }
+      // 绑定事件
+      container.querySelectorAll('.btn-done').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = Number(this.dataset.id);
+          toggleDone(id);
         });
+      });
 
-        // 点击模态背景关闭
-        document.getElementById('editModal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditModal();
+      container.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = Number(this.dataset.id);
+          deleteCommission(id);
         });
+      });
 
-        document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
-        document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
+      container.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = Number(this.dataset.id);
+          openEditModal(id);
+        });
+      });
 
-        // 回车保存
-        document.getElementById('editProject').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') saveEdit();
+      container.querySelectorAll('.btn-text-setting').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = Number(this.dataset.id);
+          openTextSettingModal(id);
         });
-        document.getElementById('editClient').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') saveEdit();
-        });
-        document.getElementById('editDdl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') saveEdit();
-        });
-        document.getElementById('editNote').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') saveEdit();
-        });
+      });
 
-        // ----- 业务操作 -----
-        function addCommission(project, client, ddl, note) {
-            if (!project.trim()) {
-                alert('请填写委托项目名称');
-                return;
-            }
-            const newItem = {
-                id: Date.now() + Math.floor(Math.random() * 1000),
-                project: project.trim(),
-                client: client.trim() || '',
-                ddl: ddl || '',
-                note: note.trim() || '',
-                imageData: null,
-                textSetting: '',
-                done: false,
-            };
-            commissions.push(newItem);
-            saveData();
-            render();
+      container.querySelectorAll('.img-upload-input').forEach(input => {
+        input.addEventListener('change', function() {
+          const id = Number(this.dataset.id);
+          const file = this.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            const dataUrl = ev.target.result;
+            updateImage(id, dataUrl);
+          };
+          reader.readAsDataURL(file);
+          this.value = '';
+        });
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ----- 编辑基础信息弹窗 -----
+    function openEditModal(id) {
+      const item = commissions.find(c => c.id === id);
+      if (!item) return;
+      editingId = id;
+      document.getElementById('editProject').value = item.project || '';
+      document.getElementById('editClient').value = item.client || '';
+      document.getElementById('editDdl').value = item.ddl || '';
+      document.getElementById('editNote').value = item.note || '';
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+      editingId = null;
+    }
+
+    function saveEdit() {
+      if (editingId === null) return;
+      const project = document.getElementById('editProject').value.trim();
+      if (!project) {
+        alert('请填写委托项目名称');
+        return;
+      }
+      const item = commissions.find(c => c.id === editingId);
+      if (item) {
+        item.project = project;
+        item.client = document.getElementById('editClient').value.trim() || '';
+        item.ddl = document.getElementById('editDdl').value || '';
+        item.note = document.getElementById('editNote').value.trim() || '';
+        saveData();
+        render();
+        closeEditModal();
+      }
+    }
+
+    // ----- 文字设定弹窗 -----
+    function openTextSettingModal(id) {
+      const item = commissions.find(c => c.id === id);
+      if (!item) return;
+      textSettingId = id;
+      document.getElementById('textPersonality').value = item.personality || '';
+      document.getElementById('textBackground').value = item.background || '';
+      document.getElementById('textAnchor').value = item.anchor || '';
+      document.getElementById('textSettingModal').classList.add('active');
+    }
+
+    function closeTextSettingModal() {
+      document.getElementById('textSettingModal').classList.remove('active');
+      textSettingId = null;
+    }
+
+    function saveTextSetting() {
+      if (textSettingId === null) return;
+      const item = commissions.find(c => c.id === textSettingId);
+      if (item) {
+        item.personality = document.getElementById('textPersonality').value.trim() || '';
+        item.background = document.getElementById('textBackground').value.trim() || '';
+        item.anchor = document.getElementById('textAnchor').value.trim() || '';
+        saveData();
+        render();
+        closeTextSettingModal();
+      }
+    }
+
+    // ----- 模态框事件绑定 -----
+    // 编辑基础信息
+    document.getElementById('editModal').addEventListener('click', function(e) {
+      if (e.target === this) closeEditModal();
+    });
+    document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
+    document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
+    // 回车保存
+    document.getElementById('editProject').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') saveEdit();
+    });
+
+    // 文字设定
+    document.getElementById('textSettingModal').addEventListener('click', function(e) {
+      if (e.target === this) closeTextSettingModal();
+    });
+    document.getElementById('cancelTextBtn').addEventListener('click', closeTextSettingModal);
+    document.getElementById('saveTextBtn').addEventListener('click', saveTextSetting);
+    // Ctrl+Enter 保存文字设定 (在textarea中)
+    document.querySelectorAll('#textPersonality, #textBackground, #textAnchor').forEach(el => {
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          saveTextSetting();
         }
+      });
+    });
 
-        function toggleDone(id) {
-            const item = commissions.find(c => c.id === id);
-            if (item) {
-                item.done = !item.done;
-                saveData();
-                render();
-            }
+    // ----- 业务操作 -----
+    function addCommission(project, client, ddl, note) {
+      if (!project.trim()) {
+        alert('请填写委托项目名称');
+        return;
+      }
+      const newItem = {
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        project: project.trim(),
+        client: client.trim() || '',
+        ddl: ddl || '',
+        note: note.trim() || '',
+        imageData: null,
+        done: false,
+        personality: '',
+        background: '',
+        anchor: '',
+      };
+      commissions.push(newItem);
+      saveData();
+      render();
+    }
+
+    function toggleDone(id) {
+      const item = commissions.find(c => c.id === id);
+      if (item) {
+        item.done = !item.done;
+        saveData();
+        render();
+      }
+    }
+
+    function deleteCommission(id) {
+      if (confirm('确定删除这个委托吗？')) {
+        commissions = commissions.filter(c => c.id !== id);
+        saveData();
+        render();
+      }
+    }
+
+    function updateImage(id, dataUrl) {
+      const item = commissions.find(c => c.id === id);
+      if (item) {
+        item.imageData = dataUrl;
+        saveData();
+        render();
+      }
+    }
+
+    // ----- 初始化 -----
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+
+      document.getElementById('addBtn').addEventListener('click', function() {
+        const project = document.getElementById('projectInput').value;
+        const client = document.getElementById('clientInput').value;
+        const ddl = document.getElementById('ddlInput').value;
+        const note = document.getElementById('noteInput').value;
+        addCommission(project, client, ddl, note);
+        document.getElementById('projectInput').value = '';
+        document.getElementById('clientInput').value = '';
+        document.getElementById('noteInput').value = '';
+      });
+
+      document.getElementById('projectInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('addBtn').click();
         }
-
-        function deleteCommission(id) {
-            if (confirm('确定删除这个委托吗？')) {
-                commissions = commissions.filter(c => c.id !== id);
-                saveData();
-                render();
-            }
-        }
-
-        function updateImage(id, dataUrl) {
-            const item = commissions.find(c => c.id === id);
-            if (item) {
-                item.imageData = dataUrl;
-                saveData();
-                render();
-            }
-        }
-
-        // ----- 初始化 -----
-        document.addEventListener('DOMContentLoaded', function() {
-            loadData();
-
-            document.getElementById('addBtn').addEventListener('click', function() {
-                const project = document.getElementById('projectInput').value;
-                const client = document.getElementById('clientInput').value;
-                const ddl = document.getElementById('ddlInput').value;
-                const note = document.getElementById('noteInput').value;
-                addCommission(project, client, ddl, note);
-                document.getElementById('projectInput').value = '';
-                document.getElementById('clientInput').value = '';
-                document.getElementById('noteInput').value = '';
-            });
-
-            document.getElementById('projectInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('addBtn').click();
-                }
-            });
-        });
-    })();
+      });
+    });
+  })();
 </script>
 </body>
 </html>
