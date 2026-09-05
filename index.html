@@ -607,6 +607,42 @@
       opacity: 0.6;
     }
 
+    /* 压缩进度提示 */
+    .compress-toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(40, 60, 85, 0.85);
+      backdrop-filter: blur(12px);
+      color: #eef4fa;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-size: 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .compress-toast.show {
+      display: flex;
+    }
+
+    .compress-toast i {
+      font-size: 1.1rem;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 680px) {
       .glass-wrapper { padding: 1.5rem; }
       .add-form { flex-direction: column; align-items: stretch; }
@@ -704,12 +740,157 @@
   </div>
 </div>
 
+<!-- 压缩进度提示 -->
+<div class="compress-toast" id="compressToast">
+  <i class="fas fa-spinner"></i>
+  <span id="compressText">正在压缩图片...</span>
+</div>
+
 <script>
   (function() {
     let commissions = [];
-    let editingId = null;          // 编辑基础信息时使用
-    let textSettingId = null;      // 文字设定时使用
+    let editingId = null;
+    let textSettingId = null;
 
+    // ----- 图片压缩工具 -----
+    function compressImage(file, maxWidth, maxHeight, quality, maxSizeKB) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            // 计算缩放尺寸
+            let width = img.width;
+            let height = img.height;
+            
+            // 如果图片本身很小，直接返回
+            if (width <= maxWidth && height <= maxHeight) {
+              // 但还是要检查文件大小，如果文件本身小但尺寸大？实际上尺寸小文件一定小
+              // 但为了安全，还是用canvas过一遍
+              compressWithCanvas(img, width, height, quality, resolve, reject);
+              return;
+            }
+            
+            // 按比例缩放
+            if (width > height) {
+              if (width > maxWidth) {
+                height = Math.round(height * (maxWidth / width));
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width = Math.round(width * (maxHeight / height));
+                height = maxHeight;
+              }
+            }
+            
+            // 如果缩放后还是太大，再次检查
+            if (width > maxWidth) {
+              height = Math.round(height * (maxWidth / width));
+              width = maxWidth;
+            }
+            if (height > maxHeight) {
+              width = Math.round(width * (maxHeight / height));
+              height = maxHeight;
+            }
+            
+            compressWithCanvas(img, width, height, quality, resolve, reject);
+          };
+          img.onerror = function() {
+            reject(new Error('图片加载失败'));
+          };
+          img.src = e.target.result;
+        };
+        reader.onerror = function() {
+          reject(new Error('文件读取失败'));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function compressWithCanvas(img, width, height, quality, resolve, reject) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        // 使用高质量缩放
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // 尝试用不同质量输出，直到大小合适
+        let currentQuality = quality;
+        let dataUrl = canvas.toDataURL('image/jpeg', currentQuality);
+        
+        // 如果图片还是太大，逐步降低质量
+        // 估算当前大小 (Base64长度 * 0.75 ≈ 字节数)
+        let estimatedSize = dataUrl.length * 0.75;
+        let targetSize = 200 * 1024; // 目标 200KB
+        
+        if (estimatedSize > targetSize) {
+          // 二分法查找合适的质量
+          let low = 0.1;
+          let high = currentQuality;
+          let mid = currentQuality;
+          let attempts = 0;
+          const maxAttempts = 15;
+          
+          while (attempts < maxAttempts) {
+            mid = (low + high) / 2;
+            dataUrl = canvas.toDataURL('image/jpeg', mid);
+            estimatedSize = dataUrl.length * 0.75;
+            
+            if (estimatedSize > targetSize) {
+              high = mid;
+            } else {
+              low = mid;
+            }
+            attempts++;
+            if (high - low < 0.01) break;
+          }
+          // 如果还是太大，强行压缩到最低质量
+          if (estimatedSize > targetSize * 1.2) {
+            dataUrl = canvas.toDataURL('image/jpeg', 0.1);
+          }
+        }
+        
+        // 最终检查：如果仍然太大，再次压缩尺寸
+        let finalDataUrl = dataUrl;
+        let finalSize = finalDataUrl.length * 0.75;
+        if (finalSize > 300 * 1024) {
+          // 缩小尺寸再试
+          const scale = Math.sqrt(200 * 1024 / finalSize);
+          const newWidth = Math.round(width * scale);
+          const newHeight = Math.round(height * scale);
+          const smallCanvas = document.createElement('canvas');
+          smallCanvas.width = newWidth;
+          smallCanvas.height = newHeight;
+          const smallCtx = smallCanvas.getContext('2d');
+          smallCtx.imageSmoothingEnabled = true;
+          smallCtx.imageSmoothingQuality = 'high';
+          smallCtx.drawImage(img, 0, 0, newWidth, newHeight);
+          finalDataUrl = smallCanvas.toDataURL('image/jpeg', 0.7);
+        }
+        
+        resolve(finalDataUrl);
+      } catch (err) {
+        reject(err);
+      }
+    }
+
+    // 显示压缩进度
+    function showCompressToast(text) {
+      const toast = document.getElementById('compressToast');
+      document.getElementById('compressText').textContent = text || '正在压缩图片...';
+      toast.classList.add('show');
+    }
+
+    function hideCompressToast() {
+      document.getElementById('compressToast').classList.remove('show');
+    }
+
+    // ----- 原有业务逻辑 -----
     function loadData() {
       const stored = localStorage.getItem('commissionsData');
       if (stored) {
@@ -719,7 +900,6 @@
             ...item,
             imageData: item.imageData || null,
             done: item.done || false,
-            // 文字设定字段
             personality: item.personality || '',
             background: item.background || '',
             anchor: item.anchor || '',
@@ -758,7 +938,15 @@
     }
 
     function saveData() {
-      localStorage.setItem('commissionsData', JSON.stringify(commissions));
+      try {
+        localStorage.setItem('commissionsData', JSON.stringify(commissions));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          alert('存储空间已满！请删除一些旧委托或使用更小的图片。');
+        } else {
+          alert('保存失败：' + e.message);
+        }
+      }
       updateBadge();
     }
 
@@ -785,14 +973,13 @@
         const doneClass = item.done ? 'done' : '';
         let imageHtml = '';
         if (item.imageData) {
-          imageHtml = `<img src="${item.imageData}" alt="设定图" />`;
+          imageHtml = `<img src="${item.imageData}" alt="设定图" loading="lazy" />`;
         } else {
           imageHtml = `<div class="empty-img-placeholder"><i class="fas fa-image"></i><span>暂无设定</span></div>`;
         }
 
         const ddlDisplay = item.ddl ? item.ddl : '未设置';
         const noteDisplay = item.note ? item.note : '';
-        // 检查是否有文字设定内容
         const hasTextSetting = (item.personality && item.personality.trim()) || 
                                (item.background && item.background.trim()) || 
                                (item.anchor && item.anchor.trim());
@@ -870,12 +1057,27 @@
           const id = Number(this.dataset.id);
           const file = this.files[0];
           if (!file) return;
-          const reader = new FileReader();
-          reader.onload = function(ev) {
-            const dataUrl = ev.target.result;
-            updateImage(id, dataUrl);
-          };
-          reader.readAsDataURL(file);
+          
+          // 显示压缩提示
+          showCompressToast('正在压缩图片...');
+          
+          // 压缩图片：最大宽度800px，最大高度800px，初始质量0.85
+          compressImage(file, 800, 800, 0.85, 200)
+            .then(compressedDataUrl => {
+              hideCompressToast();
+              updateImage(id, compressedDataUrl);
+            })
+            .catch(err => {
+              hideCompressToast();
+              console.error('图片压缩失败:', err);
+              // 如果压缩失败，尝试直接用原图（但可能会超出存储限制）
+              const reader = new FileReader();
+              reader.onload = function(ev) {
+                updateImage(id, ev.target.result);
+              };
+              reader.readAsDataURL(file);
+            });
+          
           this.value = '';
         });
       });
@@ -954,24 +1156,20 @@
     }
 
     // ----- 模态框事件绑定 -----
-    // 编辑基础信息
     document.getElementById('editModal').addEventListener('click', function(e) {
       if (e.target === this) closeEditModal();
     });
     document.getElementById('cancelEditBtn').addEventListener('click', closeEditModal);
     document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
-    // 回车保存
     document.getElementById('editProject').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') saveEdit();
     });
 
-    // 文字设定
     document.getElementById('textSettingModal').addEventListener('click', function(e) {
       if (e.target === this) closeTextSettingModal();
     });
     document.getElementById('cancelTextBtn').addEventListener('click', closeTextSettingModal);
     document.getElementById('saveTextBtn').addEventListener('click', saveTextSetting);
-    // Ctrl+Enter 保存文字设定 (在textarea中)
     document.querySelectorAll('#textPersonality, #textBackground, #textAnchor').forEach(el => {
       el.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -1024,6 +1222,11 @@
     function updateImage(id, dataUrl) {
       const item = commissions.find(c => c.id === id);
       if (item) {
+        // 检查图片大小，如果还是太大，警告用户
+        const sizeInKB = dataUrl.length * 0.75 / 1024;
+        if (sizeInKB > 350) {
+          console.warn('图片仍然较大:', Math.round(sizeInKB), 'KB');
+        }
         item.imageData = dataUrl;
         saveData();
         render();
